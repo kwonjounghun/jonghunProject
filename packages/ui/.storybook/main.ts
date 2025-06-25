@@ -8,7 +8,6 @@ const config: StorybookConfig = {
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-essentials',
-    '@storybook/addon-onboarding',
     '@storybook/addon-interactions',
     '@storybook/addon-a11y',
   ],
@@ -31,7 +30,10 @@ const config: StorybookConfig = {
     // vanilla-extract 플러그인 추가
     const { vanillaExtractPlugin } = await import('@vanilla-extract/vite-plugin');
     config.plugins = config.plugins || [];
-    config.plugins.push(vanillaExtractPlugin());
+    config.plugins.push(vanillaExtractPlugin({
+      // CSS 파일 생성 옵션
+      emitCssInSsr: true,
+    }));
 
     return config;
   },
