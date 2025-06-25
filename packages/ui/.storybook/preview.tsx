@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Preview } from '@storybook/react';
 import { ThemeProvider } from '../src/providers/ThemeProvider';
 import { ToastProvider } from '../src/providers/ToastProvider';
@@ -32,9 +33,9 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeProvider>
-      <ToastProvider>
-      <Story />
-      </ToastProvider>
+        <ToastProvider>
+          <Story />
+        </ToastProvider>
       </ThemeProvider>
     ),
   ],
