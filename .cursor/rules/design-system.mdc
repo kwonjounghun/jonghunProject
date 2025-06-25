@@ -1,6 +1,79 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
 # Design System Package - Cursor Rules
 
-You are an expert in building design systems using Radix UI primitives and vanilla-extract styling. Follow these strict architectural patterns and requirements.
+You are an expert in building design systems using Radix UI primitives and vanilla-extract styling. Follow these strict architectural patterns and requirements for the [packages/ui](mdc:packages/ui) package.
+
+## Project Structure Reference
+
+### Current UI Package Structure
+```
+packages/ui/
+├── .storybook/                    # Storybook 설정 디렉토리
+│   ├── main.ts                    # Storybook 메인 설정
+│   ├── preview.ts                 # Storybook 프리뷰 설정
+│   ├── manager.ts                 # Storybook 매니저 설정
+│   └── preview-head.html          # Storybook 헤드 HTML
+├── src/
+│   ├── components/
+│   │   ├── Button/
+│   │   │   ├── Button.css.ts
+│   │   │   ├── Button.tsx
+│   │   │   ├── Button.stories.tsx # Storybook stories
+│   │   │   ├── Button.test.tsx    # Component tests
+│   │   │   └── index.ts
+│   │   ├── Card/
+│   │   │   ├── Card.css.ts
+│   │   │   ├── Card.tsx
+│   │   │   ├── Card.stories.tsx   # Storybook stories
+│   │   │   ├── Card.test.tsx      # Component tests
+│   │   │   └── index.ts
+│   │   ├── Input/
+│   │   │   ├── Input.css.ts
+│   │   │   ├── Input.tsx
+│   │   │   ├── Input.stories.tsx  # Storybook stories
+│   │   │   ├── Input.test.tsx     # Component tests
+│   │   │   └── index.ts
+│   │   ├── Toast/
+│   │   │   ├── Toast.css.ts
+│   │   │   ├── Toast.tsx
+│   │   │   ├── Toast.stories.tsx  # Storybook stories
+│   │   │   ├── Toast.test.tsx     # Component tests
+│   │   │   ├── index.ts
+│   │   │   └── README.md
+│   │   └── index.ts
+│   ├── providers/
+│   │   ├── ThemeProvider.tsx
+│   │   ├── ToastProvider.tsx
+│   │   └── index.ts
+│   ├── styles/
+│   │   ├── global.css.ts
+│   │   ├── index.ts
+│   │   ├── sprinkles.css.ts
+│   │   ├── theme.css.ts
+│   │   └── tokens.css.ts
+│   └── index.ts
+├── __tests__/                     # 통합 테스트 디렉토리
+│   ├── setup.ts                   # 테스트 설정
+│   ├── utils.ts                   # 테스트 유틸리티
+│   └── integration/               # 통합 테스트
+├── .eslintrc.js                   # ESLint 설정
+├── .prettierrc                    # Prettier 설정
+├── jest.config.js                 # Jest 설정
+├── package.json
+└── tsconfig.json
+```
+
+### Key Files Reference
+- Main package entry: [packages/ui/src/index.ts](mdc:packages/ui/src/index.ts)
+- Theme system: [packages/ui/src/styles/theme.css.ts](mdc:packages/ui/src/styles/theme.css.ts)
+- Global styles: [packages/ui/src/styles/global.css.ts](mdc:packages/ui/src/styles/global.css.ts)
+- Design tokens: [packages/ui/src/styles/tokens.css.ts](mdc:packages/ui/src/styles/tokens.css.ts)
+- Theme provider: [packages/ui/src/providers/ThemeProvider.tsx](mdc:packages/ui/src/providers/ThemeProvider.tsx)
+- Toast provider: [packages/ui/src/providers/ToastProvider.tsx](mdc:packages/ui/src/providers/ToastProvider.tsx)
 
 ## Core Architecture Requirements
 
@@ -35,177 +108,98 @@ You are an expert in building design systems using Radix UI primitives and vanil
 
 ### Component Structure Template
 ```typescript
-// ✅ REQUIRED: Follow this exact pattern
-import * as RadixPrimitive from '@radix-ui/react-[component]';
-import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
-import { clsx } from 'clsx';
-import { forwardRef } from 'react';
-import { theme } from '../styles/theme.css';
+// [ComponentName].tsx
+// 반드시 Radix Primitive, vanilla-extract recipe, forwardRef, clsx, theme를 사용하여 구조만 선언
+// 실제 구현 내용은 작성하지 않음
+```
 
-// Define styles with vanilla-extract recipes
-export const componentStyles = recipe({
-  base: {
-    // Base styles with theme contracts
-    backgroundColor: theme.colors.background,
-    color: theme.colors.foreground,
-    borderRadius: theme.radii.md,
-    fontFamily: theme.fonts.body,
-    
-    // Responsive styles using theme breakpoints
-    '@media': {
-      [theme.breakpoints.tablet]: {
-        // Tablet-specific styles
-      },
-      [theme.breakpoints.desktop]: {
-        // Desktop-specific styles
-      }
-    }
-  },
-  variants: {
-    variant: {
-      primary: { 
-        backgroundColor: theme.colors.primary,
-        color: theme.colors.primaryForeground 
-      },
-      secondary: { 
-        backgroundColor: theme.colors.secondary,
-        color: theme.colors.secondaryForeground 
-      }
-    },
-    size: {
-      sm: { 
-        padding: theme.space[2],
-        fontSize: theme.fontSizes.sm 
-      },
-      md: { 
-        padding: theme.space[3],
-        fontSize: theme.fontSizes.base 
-      },
-      lg: { 
-        padding: theme.space[4],
-        fontSize: theme.fontSizes.lg 
-      }
-    }
-  },
-  defaultVariants: {
-    variant: 'primary',
-    size: 'md'
-  }
-});
+### Storybook Story Template - MANDATORY
+```typescript
+// [ComponentName].stories.tsx
+// Meta, StoryObj, 필수 스토리(기본, variant, size, disabled, playground) 구조만 선언
+// 실제 구현 내용은 작성하지 않음
+```
 
-type ComponentVariants = RecipeVariants<typeof componentStyles>;
-
-// Extend Radix component with proper TypeScript types
-export interface ComponentProps 
-  extends React.ComponentPropsWithoutRef<typeof RadixPrimitive.Root>,
-          ComponentVariants {}
-
-export const Component = forwardRef<
-  React.ElementRef<typeof RadixPrimitive.Root>,
-  ComponentProps
->(({ className, variant, size, ...props }, ref) => (
-  <RadixPrimitive.Root
-    ref={ref}
-    className={clsx(componentStyles({ variant, size }), className)}
-    {...props}
-  />
-));
-
-Component.displayName = 'Component';
+### Test File Template - MANDATORY
+```typescript
+// [ComponentName].test.tsx
+// describe, test, render, userEvent, axe 등 테스트 구조만 선언
+// 실제 테스트 구현 내용은 작성하지 않음
 ```
 
 ### Theme System Requirements
 ```typescript
-// theme.css.ts - REQUIRED structure
-import { createTheme, createThemeContract } from '@vanilla-extract/css';
+// theme.css.ts
+// createTheme, createThemeContract, themeContract, lightTheme, darkTheme, theme 구조만 선언
+// 실제 값, 구현 내용은 작성하지 않음
+```
 
-// Define theme contract
-export const themeContract = createThemeContract({
-  colors: {
-    // Semantic color tokens
-    background: null,
-    foreground: null,
-    primary: null,
-    primaryForeground: null,
-    secondary: null,
-    secondaryForeground: null,
-    accent: null,
-    accentForeground: null,
-    destructive: null,
-    destructiveForeground: null,
-    // State colors
-    border: null,
-    input: null,
-    ring: null,
-    // Dark mode variants
-    backgroundDark: null,
-    foregroundDark: null
-  },
-  spacing: {
-    1: null, 2: null, 3: null, 4: null, 
-    6: null, 8: null, 12: null, 16: null
-  },
-  fontSizes: {
-    xs: null, sm: null, base: null, 
-    lg: null, xl: null, '2xl': null
-  },
-  radii: {
-    sm: null, md: null, lg: null, full: null
-  },
-  breakpoints: {
-    tablet: null,
-    desktop: null
-  }
-});
+### Interactive States - REQUIRED
+```typescript
+// interactiveStyles 객체의 상태(hover, focus, active, disabled) 구조만 선언
+// 실제 스타일 구현 내용은 작성하지 않음
+```
 
-// Light theme implementation
-export const lightTheme = createTheme(themeContract, {
-  colors: {
-    background: 'hsl(0 0% 100%)',
-    foreground: 'hsl(222.2 84% 4.9%)',
-    primary: 'hsl(222.2 47.4% 11.2%)',
-    primaryForeground: 'hsl(210 40% 98%)',
-    // ... complete color definitions
-  },
-  // ... complete theme implementation
-});
+### Testing Standards by Component Type
+```typescript
+// describe, test 등 테스트 구조만 선언
+// 실제 테스트 구현 내용은 작성하지 않음
+```
 
-// Dark theme implementation
-export const darkTheme = createTheme(themeContract, {
-  colors: {
-    background: 'hsl(222.2 84% 4.9%)',
-    foreground: 'hsl(210 40% 98%)',
-    primary: 'hsl(210 40% 98%)',
-    primaryForeground: 'hsl(222.2 47.4% 11.2%)',
-    // ... complete dark color definitions
-  },
-  // ... complete dark theme implementation
-});
-
-export const theme = themeContract;
+### Storybook Documentation Standards
+```typescript
+// Meta, StoryObj, 필수 스토리 구조만 선언
+// 실제 구현 내용은 작성하지 않음
 ```
 
 ## File Organization Standard
 ```
-packages/ui/src/
-├── components/
-│   ├── button/
-│   │   ├── index.ts          # Re-exports
-│   │   ├── button.tsx        # Component implementation
-│   │   └── button.css.ts     # Vanilla-extract styles
-│   ├── dialog/
-│   │   ├── index.ts
-│   │   ├── dialog.tsx
-│   │   └── dialog.css.ts
-├── styles/
-│   ├── theme.css.ts          # Theme contracts and implementations
-│   ├── global.css.ts         # Global styles
-│   ├── tokens.css.ts         # Design tokens
-│   └── utils.css.ts          # Style utilities
-├── providers/
-│   └── theme-provider.tsx    # Theme context provider
-└── index.ts                  # Package exports
+packages/ui/
+├── .storybook/                    # Storybook 설정 디렉토리
+│   ├── main.ts                    # Storybook 메인 설정
+│   ├── preview.ts                 # Storybook 프리뷰 설정
+│   ├── manager.ts                 # Storybook 매니저 설정
+│   └── preview-head.html          # Storybook 헤드 HTML
+├── src/
+│   ├── components/
+│   │   ├── [ComponentName]/
+│   │   │   ├── index.ts           # Re-exports
+│   │   │   ├── [ComponentName].tsx        # Component implementation
+│   │   │   ├── [ComponentName].css.ts     # Vanilla-extract styles
+│   │   │   ├── [ComponentName].stories.tsx # Storybook stories
+│   │   │   └── [ComponentName].test.tsx   # Component tests
+│   │   └── index.ts               # Main component exports
+│   ├── styles/
+│   │   ├── theme.css.ts           # Theme contracts and implementations
+│   │   ├── global.css.ts          # Global styles
+│   │   ├── tokens.css.ts          # Design tokens
+│   │   └── sprinkles.css.ts       # Style utilities
+│   ├── providers/
+│   │   ├── ThemeProvider.tsx      # Theme context provider
+│   │   ├── ToastProvider.tsx      # Toast context provider
+│   │   └── index.ts               # Provider exports
+│   └── index.ts                   # Package exports
+├── __tests__/                     # 통합 테스트 디렉토리
+│   ├── setup.ts                   # 테스트 설정
+│   ├── utils.ts                   # 테스트 유틸리티
+│   └── integration/               # 통합 테스트
+├── .eslintrc.js                   # ESLint 설정
+├── .prettierrc                    # Prettier 설정
+├── jest.config.js                 # Jest 설정
+├── tsconfig.json                  # TypeScript 설정
+└── package.json                   # Package 설정 및 스크립트
 ```
+
+### Key Files Reference - UPDATED
+- Main package entry: [packages/ui/src/index.ts](mdc:packages/ui/src/index.ts)
+- Theme system: [packages/ui/src/styles/theme.css.ts](mdc:packages/ui/src/styles/theme.css.ts)
+- Global styles: [packages/ui/src/styles/global.css.ts](mdc:packages/ui/src/styles/global.css.ts)
+- Design tokens: [packages/ui/src/styles/tokens.css.ts](mdc:packages/ui/src/styles/tokens.css.ts)
+- Theme provider: [packages/ui/src/providers/ThemeProvider.tsx](mdc:packages/ui/src/providers/ThemeProvider.tsx)
+- Toast provider: [packages/ui/src/providers/ToastProvider.tsx](mdc:packages/ui/src/providers/ToastProvider.tsx)
+- Storybook config: [packages/ui/.storybook/main.ts](mdc:packages/ui/.storybook/main.ts)
+- Jest config: [packages/ui/jest.config.js](mdc:packages/ui/jest.config.js)
+- ESLint config: [packages/ui/.eslintrc.js](mdc:packages/ui/.eslintrc.js)
 
 ## Quality Standards
 
@@ -228,19 +222,17 @@ const interactiveStyles = {
   
   // Hover state
   ':hover': {
-    backgroundColor: theme.colors.primaryHover,
-    transform: 'translateY(-1px)'
+    // Hover styles using theme colors
   },
   
   // Focus state
   ':focus-visible': {
-    outline: `2px solid ${theme.colors.ring}`,
-    outlineOffset: '2px'
+    // Focus styles with proper outline
   },
   
   // Active state
   ':active': {
-    transform: 'translateY(0)'
+    // Active state styles
   },
   
   // Disabled state
@@ -263,6 +255,11 @@ const interactiveStyles = {
 - Use inline styles or style props
 - Bypass Radix accessibility features
 - Create components that don't follow the established pattern
+- **Skip Storybook story creation for any component**
+- **Skip test file creation for any component**
+- **Use testing libraries other than React Testing Library and Jest**
+- **Create components without comprehensive accessibility testing**
+- **Ignore visual regression testing requirements**
 
 ### ❌ FORBIDDEN IMPORTS
 ```typescript
@@ -270,12 +267,18 @@ const interactiveStyles = {
 import styled from 'styled-components';     // ❌
 import { css } from '@emotion/react';       // ❌
 import { makeStyles } from '@material-ui/core'; // ❌
+
+// Testing libraries - ONLY use approved ones
+import { render } from 'enzyme';            // ❌
+import { mount } from 'enzyme';             // ❌
+import { shallow } from 'enzyme';           // ❌
+import { render as renderRTL } from '@testing-library/react'; // ✅ APPROVED
 ```
 
 ## Development Workflow - MANDATORY PROCESS
 
 ### Phase 1: Planning & Preparation
-1. **Feature Conflict Check**: ALWAYS verify no existing overlapping functionality exists
+1. **Feature Conflict Check**: ALWAYS verify no existing overlapping functionality exists in [packages/ui/src/components](mdc:packages/ui/src/components)
 2. **Branch Creation**: Create a new feature branch following naming convention: `feat/component-name` or `feat/component-enhancement`
 3. **Radix Primitive Investigation**: Research if Radix UI provides the required functionality
    - If available: Plan to import and style Radix primitive
@@ -327,7 +330,7 @@ import { makeStyles } from '@material-ui/core'; // ❌
    - [ ] Rework incomplete items to maintain workflow integrity
 
 ### Before Starting Any Component - EXPANDED CHECKLIST
-1. **Duplication Analysis**: Search existing components for similar functionality
+1. **Duplication Analysis**: Search existing components in [packages/ui/src/components](mdc:packages/ui/src/components) for similar functionality
 2. **Radix Research**: Check Radix UI documentation for primitive availability
 3. **Atomic Classification**: Determine component's position in atomic design hierarchy
 4. **Branch Strategy**: Create appropriately named feature branch
@@ -346,7 +349,7 @@ import { makeStyles } from '@material-ui/core'; // ❌
 - [ ] Accessibility features verified
 - [ ] Performance optimized
 - [ ] Follows established file organization
-- [ ] Includes proper exports in index.ts
+- [ ] Includes proper exports in [packages/ui/src/components/index.ts](mdc:packages/ui/src/components/index.ts)
 
 #### Documentation & Stories
 - [ ] Storybook stories created with comprehensive examples
@@ -409,7 +412,7 @@ import { makeStyles } from '@material-ui/core'; // ❌
 #### Atoms (Basic Components)
 ```typescript
 // Example test structure for atoms
-describe('Button Component', () => {
+describe('Component', () => {
   describe('Functionality', () => {
     test('renders with default props')
     test('handles click events')
@@ -417,9 +420,7 @@ describe('Button Component', () => {
   });
   
   describe('Variants', () => {
-    test('renders primary variant correctly')
-    test('renders secondary variant correctly')
-    test('renders destructive variant correctly')
+    test('renders all variants correctly')
   });
   
   describe('Accessibility', () => {
@@ -429,8 +430,7 @@ describe('Button Component', () => {
   });
   
   describe('Theming', () => {
-    test('renders correctly in light mode')
-    test('renders correctly in dark mode')
+    test('renders correctly in light and dark modes')
   });
 });
 ```
@@ -562,4 +562,46 @@ export const Playground: Story = {
 - **Use Case Coverage**: Stories for every intended use case
 - **Accessibility Notes**: Screen reader and keyboard interaction documentation
 
-Remember: This is a design system package that others will depend on. Every component must be bulletproof, accessible, and follow these patterns exactly. The workflow is non-negotiable - shortcuts compromise the entire system's quality and consistency.
+## Package Management
+
+### Dependencies Management
+- All Radix UI primitives should be added to [packages/ui/package.json](mdc:packages/ui/package.json)
+- Vanilla-extract dependencies must be properly configured
+- Ensure all dependencies are compatible with the monorepo structure
+
+### Required Scripts - MANDATORY
+```json
+{
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
+    "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:accessibility": "jest --testPathPattern=.*\\.test\\.tsx --testNamePattern=.*accessibility.*",
+    "lint": "eslint \"src/**/*.ts*\" \"**/*.stories.tsx\" \"**/*.test.tsx\"",
+    "lint:fix": "eslint \"src/**/*.ts*\" \"**/*.stories.tsx\" \"**/*.test.tsx\" --fix",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf storybook-static"
+  }
+}
+```
+
+### Required Dependencies - MANDATORY
+```
+```
+
+## AI Agent Request Handling Rule
+
+- 만약 사용자가 본 디자인 시스템 룰을 기준으로 컴포넌트 구현을 요청할 경우,
+  - 에이전트는 단순히 구조적 선언만으로 구현하지 않는다.
+  - 아래 항목 중 하나라도 요청에 명확히 포함되어 있지 않으면, 반드시 보완하여 다시 요청한다:
+    1. **구현 기준의 구체성** (필수 prop, Radix Primitive 매핑, 토큰 네이밍 등)
+    2. **실제 사용 예시/샘플 시나리오** (어떤 prop 조합, 어떤 variant/size, 어떤 인터랙션 등)
+    3. **테스트 기준의 구체성** (필수 테스트 시나리오, 접근성 기준 등)
+    4. **디자인 토큰/테마의 최소 요구 명세** (필수 토큰, 네이밍 규칙 등)
+    5. **Storybook/테스트/문서화의 품질 기준** (모든 prop Controls, 모든 variant/size 조합, 문서화 필수 항목 등)
+    6. **Best Practice/Anti-Pattern 예시** (권장/비권장 패턴)
+  - 위 항목 중 누락된 부분이 있다면, 에이전트는 해당 정보를 구체적으로 보완하여 사용자에게 다시 요청하거나, 예시/가이드라인을 제시한 뒤 작업을 진행한다.
+  - 이 룰은 모든 컴포넌트, 스토리북, 테스트, 테마, 문서화 작업 요청에 동일하게 적용된다.
