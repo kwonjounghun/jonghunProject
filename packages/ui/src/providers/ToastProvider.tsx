@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { 
-  ToastProvider as RadixToastProvider, 
+  ToastProviderPrimitive as RadixToastProvider, 
   ToastViewport,
   Toast, 
   ToastTitle, 

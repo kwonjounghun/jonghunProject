@@ -10,12 +10,12 @@ import {
   ToastVariants 
 } from './Toast.css';
 
-// Provider 컴포넌트
-export interface ToastProviderProps extends ToastPrimitive.ToastProviderProps {
+// Provider 컴포넌트 - 기본 Radix 래퍼
+export interface ToastProviderPrimitiveProps extends ToastPrimitive.ToastProviderProps {
   children: React.ReactNode;
 }
 
-export const ToastProvider = ({ children, ...props }: ToastProviderProps) => {
+export const ToastProviderPrimitive = ({ children, ...props }: ToastProviderPrimitiveProps) => {
   return (
     <ToastPrimitive.Provider swipeDirection="right" {...props}>
       {children}
