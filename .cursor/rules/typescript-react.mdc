@@ -1,0 +1,128 @@
+# TypeScript and React Development Standards
+
+Follow these TypeScript and React development standards when working in this codebase.
+
+## TypeScript Standards
+
+### Type Definitions
+- Use `interface` for object shapes that might be extended
+- Use `type` for unions, intersections, and computed types
+- Always provide explicit return types for functions
+- Use generic constraints where appropriate
+- Prefer `unknown` over `any` when type is uncertain
+
+### Import/Export Patterns
+```typescript
+// ✅ Preferred: Named exports
+export const Component = () => { /* ... */ };
+export type ComponentProps = { /* ... */ };
+
+// ✅ Barrel exports in index.ts files
+export { Component } from './component';
+export type { ComponentProps } from './component';
+
+// ❌ Avoid default exports for components
+export default Component;
+```
+
+## React Patterns
+
+### Component Definition
+```typescript
+// ✅ Preferred: Function components with explicit typing
+interface ComponentProps {
+  title: string;
+  isVisible?: boolean;
+  onAction?: () => void;
+}
+
+export const Component = ({ title, isVisible = false, onAction }: ComponentProps) => {
+  // Component implementation
+};
+
+// ✅ For forwardRef components
+export const Component = forwardRef<HTMLDivElement, ComponentProps>(
+  ({ title, isVisible = false, onAction }, ref) => {
+    // Component implementation
+  }
+);
+```
+
+### State Management
+- Use `useState` for local component state
+- Use `useReducer` for complex state logic
+- Prefer derived state over synchronized state
+- Use `useMemo` and `useCallback` judiciously (only when performance is measured to be an issue)
+
+### Event Handlers
+```typescript
+// ✅ Preferred: Explicit event handler typing
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  // Handle click
+};
+
+const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle change
+};
+```
+
+## Code Organization
+
+### File Naming
+- Use kebab-case for file names: `user-profile.tsx`
+- Use PascalCase for component names: `UserProfile`
+- Use camelCase for utility functions: `formatUserName`
+
+### Directory Structure
+- Group related files in directories
+- Use index.ts files for clean exports
+- Separate concerns: components, hooks, utils, types
+
+## Performance Considerations
+
+### Optimization Guidelines
+- Only optimize when performance issues are measured
+- Use React DevTools Profiler to identify bottlenecks
+- Consider component splitting before memoization
+- Use dynamic imports for code splitting when appropriate
+
+### Memory Management
+- Clean up subscriptions in useEffect cleanup functions
+- Use AbortController for cancelling fetch requests
+- Remove event listeners in cleanup functions
+
+## Error Handling
+
+### Error Boundaries
+- Implement error boundaries for component tree sections
+- Provide meaningful error messages and recovery options
+- Log errors appropriately for debugging
+
+### Async Operations
+```typescript
+// ✅ Proper error handling with async/await
+const fetchData = async () => {
+  try {
+    const response = await api.getData();
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
+    throw error; // Re-throw for caller to handle
+  }
+};
+```
+
+## Testing Considerations
+
+### Component Testing
+- Write tests that reflect user behavior
+- Test component contracts (props in, behavior out)
+- Use React Testing Library for component tests
+- Mock external dependencies appropriately
+
+### Type Testing
+- Use TypeScript's type system to catch errors at compile time
+- Consider type-only imports where appropriate
+- Leverage utility types: `Pick`, `Omit`, `Partial`, etc.
+
+Remember: These standards complement the design system rules and should be followed consistently across the codebase.

@@ -1,0 +1,306 @@
+# Design System Package - Cursor Rules
+
+You are an expert in building design systems using Radix UI primitives and vanilla-extract styling. Follow these strict architectural patterns and requirements.
+
+## Core Architecture Requirements
+
+### 1. Component Foundation - MANDATORY
+- **ALWAYS** use Radix UI primitives as the foundation for ALL interactive components
+- **NEVER** build interactive components from scratch - extend Radix primitives only
+- Leverage Radix's built-in accessibility features, keyboard navigation, and focus management
+- Use Radix's compound component patterns for complex UI elements
+
+### 2. Styling System - MANDATORY
+- **EXCLUSIVELY** use vanilla-extract for all styling - no exceptions
+- **NEVER** use CSS-in-JS libraries other than vanilla-extract (no styled-components, emotion, etc.)
+- Organize styles using vanilla-extract's `.css.ts` files
+- Use vanilla-extract recipes for component variants and states
+- Implement design tokens using vanilla-extract's contract system
+
+### 3. Dark Mode Support - REQUIRED
+- **EVERY** component must support both light and dark themes
+- Use vanilla-extract's theme contracts with CSS custom properties
+- Define comprehensive theme contracts for consistent color usage
+- Implement theme switching without FOUC (Flash of Unstyled Content)
+- Test all components in both light and dark modes before completion
+
+### 4. Responsive Design - MANDATORY
+- **ALL** components must be responsive by default
+- Use vanilla-extract's responsive utilities and breakpoints
+- Implement mobile-first responsive design approach
+- Support breakpoints: mobile (320px+), tablet (768px+), desktop (1024px+)
+- Ensure touch-friendly interactions on mobile devices
+
+## Implementation Pattern
+
+### Component Structure Template
+```typescript
+// ✅ REQUIRED: Follow this exact pattern
+import * as RadixPrimitive from '@radix-ui/react-[component]';
+import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
+import { clsx } from 'clsx';
+import { forwardRef } from 'react';
+import { theme } from '../styles/theme.css';
+
+// Define styles with vanilla-extract recipes
+export const componentStyles = recipe({
+  base: {
+    // Base styles with theme contracts
+    backgroundColor: theme.colors.background,
+    color: theme.colors.foreground,
+    borderRadius: theme.radii.md,
+    fontFamily: theme.fonts.body,
+    
+    // Responsive styles using theme breakpoints
+    '@media': {
+      [theme.breakpoints.tablet]: {
+        // Tablet-specific styles
+      },
+      [theme.breakpoints.desktop]: {
+        // Desktop-specific styles
+      }
+    }
+  },
+  variants: {
+    variant: {
+      primary: { 
+        backgroundColor: theme.colors.primary,
+        color: theme.colors.primaryForeground 
+      },
+      secondary: { 
+        backgroundColor: theme.colors.secondary,
+        color: theme.colors.secondaryForeground 
+      }
+    },
+    size: {
+      sm: { 
+        padding: theme.space[2],
+        fontSize: theme.fontSizes.sm 
+      },
+      md: { 
+        padding: theme.space[3],
+        fontSize: theme.fontSizes.base 
+      },
+      lg: { 
+        padding: theme.space[4],
+        fontSize: theme.fontSizes.lg 
+      }
+    }
+  },
+  defaultVariants: {
+    variant: 'primary',
+    size: 'md'
+  }
+});
+
+type ComponentVariants = RecipeVariants<typeof componentStyles>;
+
+// Extend Radix component with proper TypeScript types
+export interface ComponentProps 
+  extends React.ComponentPropsWithoutRef<typeof RadixPrimitive.Root>,
+          ComponentVariants {}
+
+export const Component = forwardRef<
+  React.ElementRef<typeof RadixPrimitive.Root>,
+  ComponentProps
+>(({ className, variant, size, ...props }, ref) => (
+  <RadixPrimitive.Root
+    ref={ref}
+    className={clsx(componentStyles({ variant, size }), className)}
+    {...props}
+  />
+));
+
+Component.displayName = 'Component';
+```
+
+### Theme System Requirements
+```typescript
+// theme.css.ts - REQUIRED structure
+import { createTheme, createThemeContract } from '@vanilla-extract/css';
+
+// Define theme contract
+export const themeContract = createThemeContract({
+  colors: {
+    // Semantic color tokens
+    background: null,
+    foreground: null,
+    primary: null,
+    primaryForeground: null,
+    secondary: null,
+    secondaryForeground: null,
+    accent: null,
+    accentForeground: null,
+    destructive: null,
+    destructiveForeground: null,
+    // State colors
+    border: null,
+    input: null,
+    ring: null,
+    // Dark mode variants
+    backgroundDark: null,
+    foregroundDark: null
+  },
+  spacing: {
+    1: null, 2: null, 3: null, 4: null, 
+    6: null, 8: null, 12: null, 16: null
+  },
+  fontSizes: {
+    xs: null, sm: null, base: null, 
+    lg: null, xl: null, '2xl': null
+  },
+  radii: {
+    sm: null, md: null, lg: null, full: null
+  },
+  breakpoints: {
+    tablet: null,
+    desktop: null
+  }
+});
+
+// Light theme implementation
+export const lightTheme = createTheme(themeContract, {
+  colors: {
+    background: 'hsl(0 0% 100%)',
+    foreground: 'hsl(222.2 84% 4.9%)',
+    primary: 'hsl(222.2 47.4% 11.2%)',
+    primaryForeground: 'hsl(210 40% 98%)',
+    // ... complete color definitions
+  },
+  // ... complete theme implementation
+});
+
+// Dark theme implementation
+export const darkTheme = createTheme(themeContract, {
+  colors: {
+    background: 'hsl(222.2 84% 4.9%)',
+    foreground: 'hsl(210 40% 98%)',
+    primary: 'hsl(210 40% 98%)',
+    primaryForeground: 'hsl(222.2 47.4% 11.2%)',
+    // ... complete dark color definitions
+  },
+  // ... complete dark theme implementation
+});
+
+export const theme = themeContract;
+```
+
+## File Organization Standard
+```
+packages/ui/src/
+├── components/
+│   ├── button/
+│   │   ├── index.ts          # Re-exports
+│   │   ├── button.tsx        # Component implementation
+│   │   └── button.css.ts     # Vanilla-extract styles
+│   ├── dialog/
+│   │   ├── index.ts
+│   │   ├── dialog.tsx
+│   │   └── dialog.css.ts
+├── styles/
+│   ├── theme.css.ts          # Theme contracts and implementations
+│   ├── global.css.ts         # Global styles
+│   ├── tokens.css.ts         # Design tokens
+│   └── utils.css.ts          # Style utilities
+├── providers/
+│   └── theme-provider.tsx    # Theme context provider
+└── index.ts                  # Package exports
+```
+
+## Quality Standards
+
+### Accessibility Checklist - MANDATORY
+- [ ] Leverages Radix's built-in accessibility features
+- [ ] Proper ARIA labels and descriptions provided
+- [ ] Keyboard navigation functions correctly
+- [ ] Focus management works as expected
+- [ ] Color contrast meets WCAG AA standards (4.5:1 minimum)
+- [ ] Supports screen readers
+- [ ] Respects `prefers-reduced-motion`
+
+### Interactive States - REQUIRED
+```typescript
+// All interactive components must include these states
+const interactiveStyles = {
+  // Base state
+  cursor: 'pointer',
+  transition: 'all 0.2s ease-in-out',
+  
+  // Hover state
+  ':hover': {
+    backgroundColor: theme.colors.primaryHover,
+    transform: 'translateY(-1px)'
+  },
+  
+  // Focus state
+  ':focus-visible': {
+    outline: `2px solid ${theme.colors.ring}`,
+    outlineOffset: '2px'
+  },
+  
+  // Active state
+  ':active': {
+    transform: 'translateY(0)'
+  },
+  
+  // Disabled state
+  ':disabled': {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    pointerEvents: 'none'
+  }
+};
+```
+
+## Strict Prohibitions
+
+### ❌ NEVER DO THESE
+- Use CSS-in-JS libraries other than vanilla-extract
+- Create interactive components without Radix primitives
+- Hardcode colors, spacing, or typography values
+- Skip responsive design implementation
+- Ignore dark mode requirements
+- Use inline styles or style props
+- Bypass Radix accessibility features
+- Create components that don't follow the established pattern
+
+### ❌ FORBIDDEN IMPORTS
+```typescript
+// These imports are FORBIDDEN
+import styled from 'styled-components';     // ❌
+import { css } from '@emotion/react';       // ❌
+import { makeStyles } from '@material-ui/core'; // ❌
+```
+
+## Development Workflow
+
+### Before Starting Any Component
+1. Identify the appropriate Radix primitive
+2. Plan the component variants and states
+3. Define the vanilla-extract styles with theme contracts
+4. Implement responsive behavior
+5. Add dark mode support
+6. Test accessibility features
+7. Verify TypeScript types are complete
+
+### Component Completion Checklist
+- [ ] Built on appropriate Radix primitive
+- [ ] Styled exclusively with vanilla-extract
+- [ ] Supports both light and dark themes
+- [ ] Responsive across all breakpoints
+- [ ] Proper TypeScript types and interfaces
+- [ ] All interactive states implemented
+- [ ] Accessibility features verified
+- [ ] Performance optimized
+- [ ] Follows established file organization
+- [ ] Includes proper exports in index.ts
+
+## Testing Requirements
+- Test component in both light and dark modes
+- Verify responsive behavior at all breakpoints
+- Test keyboard navigation and focus management
+- Validate with screen readers
+- Check color contrast ratios
+- Test all interactive states (hover, focus, active, disabled)
+
+Remember: This is a design system package that others will depend on. Every component must be bulletproof, accessible, and follow these patterns exactly.
