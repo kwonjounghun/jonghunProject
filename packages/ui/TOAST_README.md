@@ -1,17 +1,18 @@
 # Toast 컴포넌트
 
-디자인 시스템의 토스트 알림 컴포넌트입니다. 사용자에게 임시적인 메시지를 표시하는데 사용됩니다.
+디자인 시스템의 토스트 알림 컴포넌트입니다. **Radix UI Toast**를 기반으로 구축되어 최고 수준의 접근성과 사용성을 제공합니다.
 
 ## 기능
 
-- ✅ 5가지 타입 지원 (success, error, warning, info, default)
+- ✅ **Radix UI 기반** - 검증된 접근성과 키보드 내비게이션
+- ✅ 5가지 변형 지원 (success, error, warning, info, default)
 - ✅ 자동 사라짐 기능 (타이머 설정 가능)
-- ✅ 수동 닫기 기능
-- ✅ 진행률 바 표시
+- ✅ 스와이프로 닫기 (모바일 최적화)
 - ✅ 여러 토스트 스택 관리
 - ✅ 반응형 디자인
-- ✅ 애니메이션 효과
-- ✅ 접근성 지원 (ARIA)
+- ✅ 부드러운 애니메이션 효과
+- ✅ WCAG AA 접근성 준수
+- ✅ 다크 모드 지원
 
 ## 설치
 
@@ -21,17 +22,18 @@ npm install @jonghun-project/ui
 
 ## 기본 사용법
 
-### 1. Provider 설정
+### 1. Provider 및 Toaster 설정
 
-앱의 최상위에서 `ToastProvider`를 설정합니다:
+앱의 최상위에서 `ToastProvider`와 `Toaster`를 설정합니다:
 
 ```tsx
-import { ToastProvider } from '@jonghun-project/ui';
+import { ToastProvider, Toaster } from '@jonghun-project/ui';
 
 function App() {
   return (
-    <ToastProvider maxToasts={5}>
+    <ToastProvider>
       {/* 앱 컴포넌트들 */}
+      <Toaster />
     </ToastProvider>
   );
 }
@@ -80,7 +82,8 @@ function MyComponent() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `maxToasts` | `number` | `5` | 최대 토스트 개수 |
+| `duration` | `number` | `5000` | 기본 토스트 지속 시간 (ms) |
+| `swipeThreshold` | `number` | `50` | 스와이프 임계값 (px) |
 | `children` | `ReactNode` | - | 자식 컴포넌트 |
 
 ### useToast Hook
@@ -105,13 +108,33 @@ function MyComponent() {
 
 ```tsx
 interface ToastOptions {
-  duration?: number;    // 자동 사라짐 시간 (ms), 0이면 수동으로만 닫기
-  closable?: boolean;   // 닫기 버튼 표시 여부
-  onClose?: () => void; // 토스트가 닫힐 때 콜백
+  duration?: number;    // 자동 사라짐 시간 (ms)
+  variant?: 'default' | 'success' | 'error' | 'warning' | 'info';
+  action?: {            // 액션 버튼
+    label: string;
+    onClick: () => void;
+  };
+  onOpenChange?: (open: boolean) => void; // 열림/닫힘 상태 변경 콜백
 }
 ```
 
 ## 고급 사용법
+
+### 액션 버튼이 있는 토스트
+
+```tsx
+const { toast } = useToast();
+
+toast.info('업데이트 가능', '새 버전이 출시되었습니다.', {
+  action: {
+    label: '업데이트',
+    onClick: () => {
+      // 업데이트 로직
+      console.log('업데이트 시작');
+    }
+  }
+});
+```
 
 ### 커스텀 duration 설정
 
@@ -121,19 +144,21 @@ const { toast } = useToast();
 // 10초 후 자동으로 사라짐
 toast.success('저장 완료', '파일이 저장되었습니다.', { duration: 10000 });
 
-// 수동으로만 닫을 수 있음
-toast.error('중요한 오류', '즉시 확인이 필요합니다.', { duration: 0 });
+// 영구 토스트 (수동으로만 닫기)
+toast.error('중요한 오류', '즉시 확인이 필요합니다.', { duration: Infinity });
 ```
 
-### 닫기 콜백 사용
+### 상태 변경 콜백
 
 ```tsx
 const { toast } = useToast();
 
 toast.info('알림', '이 메시지를 확인하세요.', {
-  onClose: () => {
-    console.log('토스트가 닫혔습니다.');
-    // 추가 로직 수행
+  onOpenChange: (open) => {
+    if (!open) {
+      console.log('토스트가 닫혔습니다.');
+      // 추가 로직 수행
+    }
   }
 });
 ```
@@ -148,36 +173,82 @@ const handleClearAll = () => {
 };
 ```
 
-### 커스텀 토스트
+### 완전 커스텀 토스트
 
 ```tsx
 const { toast } = useToast();
 
 toast.custom({
-  type: 'success',
-  title: '커스텀 제목',
-  description: '커스텀 설명',
-  duration: 3000,
-  closable: true,
-  onClose: () => console.log('닫힘')
+  title: '커스텀 토스트',
+  description: '완전히 사용자 정의된 토스트입니다.',
+  variant: 'success',
+  duration: 8000,
+  action: {
+    label: '확인',
+    onClick: () => console.log('확인됨')
+  },
+  onOpenChange: (open) => console.log('상태:', open)
 });
 ```
 
-## 스타일링
+### 조건부 토스트
 
-토스트 컴포넌트는 디자인 시스템의 테마를 자동으로 따릅니다. 각 타입별로 다른 색상이 적용됩니다:
+```tsx
+import { useToast } from '@jonghun-project/ui';
 
-- **Success**: 초록색 계열
-- **Error**: 빨간색 계열  
-- **Warning**: 주황색 계열
-- **Info**: 파란색 계열
-- **Default**: 회색 계열
+function ApiComponent() {
+  const { toast } = useToast();
 
-## 접근성
+  const callApi = async () => {
+    try {
+      const response = await fetch('/api/data');
+      
+      if (response.ok) {
+        toast.success('성공', '데이터를 성공적으로 가져왔습니다.');
+      } else {
+        toast.warning('경고', '일부 데이터를 가져오지 못했습니다.');
+      }
+    } catch (error) {
+      toast.error('오류', '네트워크 연결을 확인해주세요.', {
+        action: {
+          label: '재시도',
+          onClick: callApi
+        }
+      });
+    }
+  };
 
-- ARIA 역할과 속성이 적절히 설정됨 (`role="alert"`, `aria-live="polite"`)
-- 키보드 내비게이션 지원
-- 스크린 리더 친화적
+  return <button onClick={callApi}>API 호출</button>;
+}
+```
+
+## 기술적 우수성
+
+### Radix UI 기반
+- **검증된 접근성**: WCAG AA 표준 준수
+- **키보드 내비게이션**: 완전한 키보드 지원
+- **스크린 리더 호환**: 모든 보조 기술과 호환
+- **포커스 관리**: 자동 포커스 관리 및 트래핑
+
+### 스타일링 시스템
+- **vanilla-extract**: 성능 최적화된 CSS-in-TS
+- **다크 모드**: 자동 테마 전환 지원
+- **반응형**: 모바일 퍼스트 디자인
+- **커스터마이징**: 완전한 스타일 오버라이드 가능
+
+### 사용자 경험
+- **스와이프 제스처**: 모바일에서 직관적인 닫기
+- **애니메이션**: 부드러운 슬라이드 효과
+- **스택 관리**: 여러 토스트 자동 관리
+- **터치 최적화**: 터치 디바이스 최적화
+
+## 접근성 특징
+
+- **ARIA 라벨**: 모든 요소에 적절한 ARIA 속성
+- **라이브 리전**: 스크린 리더 자동 알림
+- **키보드 접근**: Tab/Enter/Escape 키 지원
+- **색상 대비**: WCAG AA 색상 대비 준수
+- **모션 감소**: prefers-reduced-motion 지원
 
 ## 예제
 

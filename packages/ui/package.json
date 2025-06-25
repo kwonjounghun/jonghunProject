@@ -29,5 +29,9 @@
   },
   "peerDependencies": {
     "react": "^18.2.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-toast": "^1.2.14",
+    "clsx": "^2.1.1"
   }
 }

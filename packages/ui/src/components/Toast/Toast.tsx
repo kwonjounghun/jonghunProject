@@ -1,69 +1,138 @@
-import React, { useState, useCallback, useEffect, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
+import * as ToastPrimitive from '@radix-ui/react-toast';
+import { clsx } from 'clsx';
 import {
   toast,
-  toastContainer,
-  toastIcon,
-  toastContent,
+  toastViewport,
   toastTitle,
   toastDescription,
-  toastCloseButton,
-  toastProgressBar,
+  toastAction,
+  toastClose,
   ToastVariants,
 } from './Toast.css';
 
-// CSS 스타일 re-export
-export { toastContainer } from './Toast.css';
-
-// 토스트 타입 정의
-export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'default';
-
-export interface ToastItem {
-  id: string;
-  type: ToastType;
-  title?: string;
-  description?: string;
+// Toast Provider - Radix UI의 Provider를 wrapping
+export interface ToastProviderProps {
+  children: React.ReactNode;
+  /**
+   * 최대 토스트 개수
+   */
+  swipeThreshold?: number;
+  /**
+   * 토스트 지속 시간 (ms)
+   */
   duration?: number;
-  closable?: boolean;
-  onClose?: () => void;
 }
 
-export interface ToastProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'id'> {
-  /**
-   * 토스트의 고유 ID
-   */
-  id: string;
+export const ToastProvider = ({ 
+  children, 
+  swipeThreshold = 50,
+  duration = 5000,
+  ...props 
+}: ToastProviderProps) => (
+  <ToastPrimitive.Provider swipeThreshold={swipeThreshold} duration={duration} {...props}>
+    {children}
+    <ToastViewport />
+  </ToastPrimitive.Provider>
+);
+
+// Toast Viewport - 토스트들이 렌더링되는 컨테이너
+const ToastViewport = forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Viewport>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Viewport>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitive.Viewport
+    ref={ref}
+    className={clsx(toastViewport, className)}
+    {...props}
+  />
+));
+
+ToastViewport.displayName = ToastPrimitive.Viewport.displayName;
+
+// Toast Root
+export interface ToastProps
+  extends Omit<React.ComponentPropsWithoutRef<typeof ToastPrimitive.Root>, 'type'> {
   /**
    * 토스트 타입
    */
-  type?: ToastType;
-  /**
-   * 토스트 제목
-   */
-  title?: string;
-  /**
-   * 토스트 설명
-   */
-  description?: string;
-  /**
-   * 토스트가 자동으로 사라지는 시간 (ms). 0이면 자동으로 사라지지 않음.
-   */
-  duration?: number;
-  /**
-   * 수동으로 닫을 수 있는지 여부
-   */
-  closable?: boolean;
-  /**
-   * 토스트가 닫힐 때 호출되는 콜백
-   */
-  onClose?: () => void;
-  /**
-   * 토스트 상태 (애니메이션 용)
-   */
-  state?: 'showing' | 'closing';
+  variant?: 'default' | 'success' | 'error' | 'warning' | 'info';
 }
 
-// 기본 아이콘들
-const DefaultIcons = {
+const Toast = forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Root>,
+  ToastProps
+>(({ className, variant = 'default', ...props }, ref) => (
+  <ToastPrimitive.Root
+    ref={ref}
+    className={clsx(toast({ type: variant }), className)}
+    {...props}
+  />
+));
+
+Toast.displayName = ToastPrimitive.Root.displayName;
+
+// Toast Action
+const ToastAction = forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Action>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Action>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitive.Action
+    ref={ref}
+    className={clsx(toastAction, className)}
+    {...props}
+  />
+));
+
+ToastAction.displayName = ToastPrimitive.Action.displayName;
+
+// Toast Close
+const ToastClose = forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Close>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Close>
+>(({ className, children, ...props }, ref) => (
+  <ToastPrimitive.Close
+    ref={ref}
+    className={clsx(toastClose, className)}
+    toast-close=""
+    {...props}
+  >
+    {children || '×'}
+  </ToastPrimitive.Close>
+));
+
+ToastClose.displayName = ToastPrimitive.Close.displayName;
+
+// Toast Title
+const ToastTitle = forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitive.Title
+    ref={ref}
+    className={clsx(toastTitle, className)}
+    {...props}
+  />
+));
+
+ToastTitle.displayName = ToastPrimitive.Title.displayName;
+
+// Toast Description
+const ToastDescription = forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitive.Description
+    ref={ref}
+    className={clsx(toastDescription, className)}
+    {...props}
+  />
+));
+
+ToastDescription.displayName = ToastPrimitive.Description.displayName;
+
+// 타입별 아이콘
+const ToastIcons = {
   success: '✓',
   error: '✕',
   warning: '⚠',
@@ -71,108 +140,59 @@ const DefaultIcons = {
   default: '●',
 };
 
-/**
- * 개별 토스트 컴포넌트
- */
-export const Toast = forwardRef<HTMLDivElement, ToastProps>(
-  (
-    {
-      id,
-      type = 'default',
-      title,
-      description,
-      duration = 5000,
-      closable = true,
-      onClose,
-      state = 'showing',
-      className,
-      ...rest
-    },
-    ref
-  ) => {
-    const [progress, setProgress] = useState(100);
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+// 사용하기 쉬운 통합 컴포넌트
+export interface SimpleToastProps extends Omit<ToastProps, 'variant'> {
+  title: string;
+  description?: string;
+  variant?: 'default' | 'success' | 'error' | 'warning' | 'info';
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+  showClose?: boolean;
+}
 
-    const handleClose = useCallback(() => {
-      if (onClose) {
-        onClose();
-      }
-    }, [onClose]);
-
-    // 자동 닫기 타이머
-    useEffect(() => {
-      if (duration > 0 && state === 'showing') {
-        const startTime = Date.now();
-        const interval = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          const remaining = Math.max(0, duration - elapsed);
-          setProgress((remaining / duration) * 100);
-
-          if (remaining <= 0) {
-            clearInterval(interval);
-            handleClose();
-          }
-        }, 10);
-
-        setTimeoutId(interval);
-
-        return () => {
-          clearInterval(interval);
-        };
-      }
-    }, [duration, handleClose, state]);
-
-    // 컴포넌트 언마운트 시 타이머 정리
-    useEffect(() => {
-      return () => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-      };
-    }, [timeoutId]);
-
-    return (
-      <div
-        ref={ref}
-        className={toast({ type })}
-        data-state={state}
-        role="alert"
-        aria-live="polite"
-        {...rest}
-      >
-        {/* 아이콘 */}
-        <div className={toastIcon}>
-          {DefaultIcons[type]}
-        </div>
-
-        {/* 내용 */}
-        <div className={toastContent}>
-          {title && <div className={toastTitle}>{title}</div>}
-          {description && <div className={toastDescription}>{description}</div>}
-        </div>
-
-        {/* 닫기 버튼 */}
-        {closable && (
-          <button
-            className={toastCloseButton}
-            onClick={handleClose}
-            aria-label="토스트 닫기"
-            type="button"
-          >
-            ×
-          </button>
-        )}
-
-        {/* 진행률 바 */}
-        {duration > 0 && (
-          <div
-            className={toastProgressBar}
-            style={{ width: `${progress}%` }}
-          />
-        )}
+export const SimpleToast = forwardRef<
+  React.ElementRef<typeof Toast>,
+  SimpleToastProps
+>(({ 
+  title, 
+  description, 
+  variant = 'default', 
+  action, 
+  showClose = true,
+  className,
+  ...props 
+}, ref) => (
+  <Toast ref={ref} variant={variant} className={className} {...props}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ fontSize: '16px' }}>{ToastIcons[variant]}</span>
+      <div>
+        <ToastTitle>{title}</ToastTitle>
+        {description && <ToastDescription>{description}</ToastDescription>}
       </div>
-    );
-  }
-);
+    </div>
+    
+    {action && (
+      <ToastAction asChild altText={action.label}>
+        <button onClick={action.onClick}>
+          {action.label}
+        </button>
+      </ToastAction>
+    )}
+    
+    {showClose && <ToastClose />}
+  </Toast>
+));
 
-Toast.displayName = 'Toast';
+SimpleToast.displayName = 'SimpleToast';
+
+// Export all components
+export {
+  Toast,
+  ToastAction,
+  ToastClose,
+  ToastDescription,
+  ToastTitle,
+  ToastViewport,
+};
