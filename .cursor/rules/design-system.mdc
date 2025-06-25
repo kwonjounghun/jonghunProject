@@ -272,19 +272,72 @@ import { css } from '@emotion/react';       // ❌
 import { makeStyles } from '@material-ui/core'; // ❌
 ```
 
-## Development Workflow
+## Development Workflow - MANDATORY PROCESS
 
-### Before Starting Any Component
-1. Identify the appropriate Radix primitive
-2. Plan the component variants and states
-3. Define the vanilla-extract styles with theme contracts
-4. Implement responsive behavior
-5. Add dark mode support
-6. Test accessibility features
-7. Verify TypeScript types are complete
+### Phase 1: Planning & Preparation
+1. **Feature Conflict Check**: ALWAYS verify no existing overlapping functionality exists
+2. **Branch Creation**: Create a new feature branch following naming convention: `feat/component-name` or `feat/component-enhancement`
+3. **Radix Primitive Investigation**: Research if Radix UI provides the required functionality
+   - If available: Plan to import and style Radix primitive
+   - If unavailable: Study similar Radix implementations to maintain consistency with Radix philosophy
 
-### Component Completion Checklist
-- [ ] Built on appropriate Radix primitive
+### Phase 2: Architecture & Design Pattern Compliance
+4. **Atomic Design Pattern**: MANDATORY adherence to atomic design principles
+   - Atoms: Basic building blocks (buttons, inputs, labels)
+   - Molecules: Simple combinations of atoms (form groups, navigation items)
+   - Organisms: Complex UI components (forms, headers, modals)
+   - Templates: Page-level layouts
+   - Pages: Specific instances of templates
+
+### Phase 3: Implementation
+5. **Component Development**:
+   - Implement functionality according to established patterns
+   - Apply styling using vanilla-extract exclusively
+   - Ensure responsive design and dark mode support
+   - Follow TypeScript typing standards
+
+### Phase 4: Documentation & Testing
+6. **Storybook Creation**: MANDATORY for every component
+   - Write comprehensive component stories
+   - Include design purpose and usage guidelines
+   - Maintain change history documentation
+   - Create detailed Args configuration with Controls for all dynamic/user-input props
+   - Document all use cases and variants
+
+### Phase 5: Quality Assurance
+7. **Test Implementation**: Write comprehensive test cases covering:
+   - Component functionality
+   - User interactions
+   - Accessibility compliance
+   - Responsive behavior
+   - Dark/light mode compatibility
+
+### Phase 6: Version Control
+8. **Commit Standards**: Create meaningful commits for each workflow phase:
+   - `feat: add [component] foundation`
+   - `style: implement [component] styling with vanilla-extract`
+   - `docs: add [component] storybook stories and documentation`
+   - `test: add [component] test suite`
+   - `refactor: optimize [component] implementation`
+
+### Phase 7: Quality Gate
+9. **Workflow Compliance Check**: After each phase, verify:
+   - [ ] No workflow steps were skipped
+   - [ ] All requirements are met before proceeding
+   - [ ] Rework incomplete items to maintain workflow integrity
+
+### Before Starting Any Component - EXPANDED CHECKLIST
+1. **Duplication Analysis**: Search existing components for similar functionality
+2. **Radix Research**: Check Radix UI documentation for primitive availability
+3. **Atomic Classification**: Determine component's position in atomic design hierarchy
+4. **Branch Strategy**: Create appropriately named feature branch
+5. **Dependencies Audit**: Identify required Radix primitives and vanilla-extract patterns
+6. **Documentation Planning**: Outline Storybook stories and component documentation
+7. **Testing Strategy**: Plan test scenarios and edge cases
+
+### Component Completion Checklist - ENHANCED
+#### Technical Implementation
+- [ ] Built on appropriate Radix primitive (or follows Radix philosophy if custom)
 - [ ] Styled exclusively with vanilla-extract
 - [ ] Supports both light and dark themes
 - [ ] Responsive across all breakpoints
@@ -295,12 +348,218 @@ import { makeStyles } from '@material-ui/core'; // ❌
 - [ ] Follows established file organization
 - [ ] Includes proper exports in index.ts
 
-## Testing Requirements
-- Test component in both light and dark modes
-- Verify responsive behavior at all breakpoints
-- Test keyboard navigation and focus management
-- Validate with screen readers
-- Check color contrast ratios
-- Test all interactive states (hover, focus, active, disabled)
+#### Documentation & Stories
+- [ ] Storybook stories created with comprehensive examples
+- [ ] Component purpose and design rationale documented
+- [ ] Usage guidelines and best practices documented
+- [ ] Change history maintained
+- [ ] Args configuration with Controls for dynamic props
+- [ ] All use cases and variants demonstrated
 
-Remember: This is a design system package that others will depend on. Every component must be bulletproof, accessible, and follow these patterns exactly.
+#### Testing & Quality
+- [ ] Unit tests covering functionality
+- [ ] Integration tests for user interactions
+- [ ] Accessibility tests implemented
+- [ ] Visual regression tests added
+- [ ] Performance benchmarks verified
+
+#### Process Compliance
+- [ ] Followed atomic design classification
+- [ ] No functionality duplication with existing components
+- [ ] Appropriate git commits created
+- [ ] Workflow compliance verified at each phase
+- [ ] All phases completed without shortcuts
+
+## Testing Requirements - COMPREHENSIVE COVERAGE
+
+### Test Categories - ALL MANDATORY
+1. **Functional Testing**
+   - Component renders correctly with default props
+   - All prop variations work as expected
+   - Event handlers trigger correctly
+   - State management functions properly
+
+2. **Visual Testing**
+   - Component appearance in light mode
+   - Component appearance in dark mode
+   - Responsive behavior at all breakpoints (mobile, tablet, desktop)
+   - All variant combinations render correctly
+
+3. **Interaction Testing**
+   - Mouse interactions (click, hover, drag)
+   - Keyboard navigation and shortcuts
+   - Touch interactions on mobile devices
+   - Focus management and tab order
+
+4. **Accessibility Testing**
+   - Screen reader compatibility
+   - ARIA attributes and labels
+   - Color contrast ratios (WCAG AA compliance)
+   - Focus indicators visibility
+   - Keyboard-only navigation
+
+5. **Integration Testing**
+   - Component works within different layouts
+   - Plays well with other design system components
+   - Theme switching functionality
+   - Context provider dependencies
+
+### Testing Standards by Component Type
+
+#### Atoms (Basic Components)
+```typescript
+// Example test structure for atoms
+describe('Button Component', () => {
+  describe('Functionality', () => {
+    test('renders with default props')
+    test('handles click events')
+    test('supports disabled state')
+  });
+  
+  describe('Variants', () => {
+    test('renders primary variant correctly')
+    test('renders secondary variant correctly')
+    test('renders destructive variant correctly')
+  });
+  
+  describe('Accessibility', () => {
+    test('has proper ARIA attributes')
+    test('supports keyboard navigation')
+    test('meets color contrast requirements')
+  });
+  
+  describe('Theming', () => {
+    test('renders correctly in light mode')
+    test('renders correctly in dark mode')
+  });
+});
+```
+
+#### Molecules/Organisms (Complex Components)
+- Include additional tests for component composition
+- Test internal state management
+- Verify complex user workflows
+- Test error handling and edge cases
+
+### Test Implementation Requirements
+- **Jest + React Testing Library**: Primary testing framework
+- **@testing-library/jest-dom**: Enhanced DOM matchers
+- **@testing-library/user-event**: User interaction simulation
+- **jest-axe**: Accessibility testing
+- **Storybook Test Runner**: Visual regression testing
+
+### Performance Testing
+- Component rendering performance
+- Memory usage optimization
+- Bundle size impact assessment
+- Re-render efficiency testing
+
+## Storybook Documentation Standards
+
+### Story Structure - MANDATORY FORMAT
+```typescript
+import type { Meta, StoryObj } from '@storybook/react';
+import { Component } from './component';
+
+const meta: Meta<typeof Component> = {
+  title: 'Design System/[Atomic Level]/Component Name',
+  component: Component,
+  parameters: {
+    docs: {
+      description: {
+        component: `
+## Purpose
+Brief description of component's design purpose and when to use it.
+
+## Usage Guidelines
+- When to use this component
+- When NOT to use this component
+- Best practices and recommendations
+
+## Change History
+- v1.0.0: Initial implementation
+- v1.1.0: Added new variant
+- v1.2.0: Enhanced accessibility features
+        `
+      }
+    }
+  },
+  argTypes: {
+    // Detailed Args configuration for ALL dynamic props
+    variant: {
+      control: { type: 'select' },
+      options: ['primary', 'secondary', 'destructive'],
+      description: 'Visual style variant of the component'
+    },
+    size: {
+      control: { type: 'radio' },
+      options: ['sm', 'md', 'lg'],
+      description: 'Size variation of the component'
+    },
+    disabled: {
+      control: { type: 'boolean' },
+      description: 'Disables component interaction'
+    }
+    // Include ALL user-configurable props with detailed controls
+  }
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+// Default story showing primary use case
+export const Default: Story = {
+  args: {
+    variant: 'primary',
+    size: 'md',
+    children: 'Button Text'
+  }
+};
+
+// Stories for ALL use cases and variants
+export const AllVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <Component variant="primary">Primary</Component>
+      <Component variant="secondary">Secondary</Component>
+      <Component variant="destructive">Destructive</Component>
+    </div>
+  )
+};
+
+export const AllSizes: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+      <Component size="sm">Small</Component>
+      <Component size="md">Medium</Component>
+      <Component size="lg">Large</Component>
+    </div>
+  )
+};
+
+export const DisabledState: Story = {
+  args: {
+    disabled: true,
+    children: 'Disabled Button'
+  }
+};
+
+// Interactive story for testing
+export const Playground: Story = {
+  args: {
+    variant: 'primary',
+    size: 'md',
+    children: 'Interactive Button'
+  }
+};
+```
+
+### Documentation Requirements
+- **Component Purpose**: Clear explanation of design intent
+- **Usage Guidelines**: When and how to use the component
+- **Change History**: Version tracking and migration notes
+- **Interactive Controls**: All dynamic props must have Storybook controls
+- **Use Case Coverage**: Stories for every intended use case
+- **Accessibility Notes**: Screen reader and keyboard interaction documentation
+
+Remember: This is a design system package that others will depend on. Every component must be bulletproof, accessible, and follow these patterns exactly. The workflow is non-negotiable - shortcuts compromise the entire system's quality and consistency.
